@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const { getPosts, createPost } = require('../controllers/postController');
-const { protect } = require('../middleware/authMiddleware'); // Get the gatekeeper
+
+// --- THIS IS THE FIX ---
+// 1. Import the middleware directly, not as { protect }
+const authMiddleware = require('../middleware/authMiddleware'); 
 
 // @route /api/posts
 
-// Anyone can GET posts
+// Anyone can GET posts (this route is not protected)
 router.route('/').get(getPosts);
 
-// Only logged-in users (protected) can POST new posts
-router.route('/').post(protect, createPost); 
+// 2. Use the correct middleware function name: authMiddleware
+router.route('/').post(authMiddleware, createPost); 
 
 module.exports = router;
