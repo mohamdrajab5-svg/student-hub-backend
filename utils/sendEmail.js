@@ -10,6 +10,9 @@ const sendEmail = async (options) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+    rejectUnauthorized: false // This can help bypass some self-signed certificate issues
+  }
   });
 
   // 2) Define the email options
