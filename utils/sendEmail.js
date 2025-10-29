@@ -1,31 +1,31 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+// Initialize Resend with the API key from Render's environment
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (options) => {
-  // 1) Create a transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: 587, // This is the standard port for Gmail SMTP
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-    rejectUnauthorized: false // This can help bypass some self-signed certificate issues
+  try {
+    const { data, error } = await resend.emails.send({
+      // You MUST use an email from your verified domain here
+      from: 'Student Hub <no-reply@your-verified-domain.com>',
+      to: options.email,
+      subject: options.subject,
+      text: options.message, // Resend handles text-only emails
+    });
+
+    if (error) {
+      // If Resend itself reports an error, throw it
+      throw new Error(error.message);
+    }
+
+    // Log the success for our records
+    console.log('Resend email sent successfully:', data.id);
+
+  } catch (error) {
+    // This will catch any error (like auth failure or network issues)
+    console.error('Failed to send email:', error);
+    throw error; // Re-throw the error so the auth route can catch it
   }
-  });
-
-  // 2) Define the email options
-  const mailOptions = {
-    from: `Student Hub <${process.env.EMAIL_USER}>`,
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-    // html: (can add html version later)
-  };
-
-  // 3) Actually send the email
-  await transporter.sendMail(mailOptions);
 };
 
 module.exports = sendEmail;
