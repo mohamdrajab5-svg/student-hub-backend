@@ -7,7 +7,7 @@ const sendEmail = async (options) => {
   try {
     const { data, error } = await resend.emails.send({
       // You MUST use an email from your verified domain here
-      from: 'Student Hub <no-reply@your-verified-domain.com>',
+      from: 'Student Hub <no-reply@mystudenthub.com>',
       to: options.email,
       subject: options.subject,
       text: options.message, // Resend handles text-only emails
