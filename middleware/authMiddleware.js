@@ -1,35 +1,38 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // We need the User model to find the user
+const admin = require('firebase-admin');
 
-const protect = async (req, res, next) => {
-  let token;
+// --- 1. Initialize Firebase Admin ---
+// This code reads the JSON string you just pasted into Render
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-  // Check if the token was sent in the 'Authorization' header
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    try {
-      // Get token from header (e.g., "Bearer eyJhbGciOiJI...")
-      token = req.headers.authorization.split(' ')[1];
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
-      // Verify the token using our secret
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Find the user from the token's ID and attach them to the request
-      // We exclude the password when fetching the user
-      req.user = await User.findById(decoded.id).select('-password');
+// --- 2. The new Authentication Middleware ---
+const authMiddleware = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-      next(); // Move on to the next function (the controller)
-    } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No token provided or invalid format' });
   }
 
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+  const idToken = authHeader.split('Bearer ')[1];
+
+  try {
+    // This is where Firebase verifies the token from the frontend
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    // We add the user's info to the request object
+    // This lets our other routes know who the user is
+    req.user = decodedToken; 
+
+    next(); // Token is valid, proceed to the next function (e.g., createPost)
+
+  } catch (error) {
+    console.error('Error verifying Firebase token:', error);
+    return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
 
-module.exports = { protect };
+module.exports = authMiddleware;
