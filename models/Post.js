@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema(
   {
+    // --- THIS IS THE FIX ---
+    // Change the user type from ObjectId to String
     user: {
-      type: mongoose.Schema.Types.ObjectId, // Links this post to a User
+      type: String, // This is the Firebase ID (req.user.uid)
       required: true,
-      ref: 'User', // The model to link to
     },
     title: {
       type: String,
