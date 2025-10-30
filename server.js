@@ -26,8 +26,8 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 
 // Protected routes (user must be logged in with Firebase)
 app.use('/api/posts', authMiddleware, require('./routes/postRoutes'));
-app.storage.use('/api/tasks', authMiddleware, require('./routes/taskRoutes')); // <-- ADDED THIS
-app.use('/api/users', authMiddleware, require('./routes/userRoutes')); // <-- ADDED THIS
+app.use('/api/tasks', authMiddleware, require('./routes/taskRoutes')); // <-- ADDED
+app.use('/api/users', authMiddleware, require('./routes/userRoutes')); // <-- ADDED
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
