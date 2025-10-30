@@ -20,13 +20,14 @@ app.get('/', (req, res) => {
 });
 
 // === API Routes ===
+
 // Public routes (no auth needed)
 app.use('/api/contact', require('./routes/contactRoutes'));
 
 // Protected routes (user must be logged in with Firebase)
 app.use('/api/posts', authMiddleware, require('./routes/postRoutes'));
-app.use('/api/tasks', authMiddleware, require('./routes/taskRoutes'));
-app.use('/api/users', authMiddleware, require('./routes/userRoutes'));
+
+// We have removed the lines for taskRoutes and userRoutes because the files don't exist.
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
